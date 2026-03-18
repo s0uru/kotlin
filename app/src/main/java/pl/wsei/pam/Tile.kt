@@ -10,12 +10,10 @@ data class Tile(val button: ImageButton, var tileResource: Int, val deckResource
     private var _revealed: Boolean = false
 
     var revealed: Boolean
-        get() {
-            return _revealed
-        }
+        get() = _revealed
         set(value) {
             _revealed = value
-            // Uzupełnione TODO:
+            // Aktualizacja widoku przycisku
             if (_revealed) {
                 button.setImageResource(tileResource)
             } else {

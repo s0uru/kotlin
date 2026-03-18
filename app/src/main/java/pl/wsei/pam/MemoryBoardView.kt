@@ -1,11 +1,9 @@
 package pl.wsei.pam
 
-import android.R
 import android.view.Gravity
 import android.view.View
 import android.widget.GridLayout
 import android.widget.ImageButton
-import pl.wsei.pam.Tile
 import java.util.Stack
 
 class MemoryBoardView(
@@ -15,49 +13,39 @@ class MemoryBoardView(
 ) {
     private val tiles: MutableMap<String, Tile> = mutableMapOf()
 
-    // Lista 18 wbudowanych ikon Androida (żebyś nie musiał tworzyć ich ręcznie)
+    // Upewnij się, że masz wystarczającą liczbę ikon (min. 18 dla planszy 6x6)
     private val icons: List<Int> = listOf(
-        R.drawable.ic_dialog_email,
-        R.drawable.ic_dialog_info,
-        R.drawable.ic_dialog_map,
-        R.drawable.ic_menu_camera,
-        R.drawable.ic_menu_call,
-        R.drawable.ic_menu_compass,
-        R.drawable.ic_menu_directions,
-        R.drawable.ic_menu_gallery,
-        R.drawable.ic_menu_help,
-        R.drawable.ic_menu_info_details,
-        R.drawable.ic_menu_mapmode,
-        R.drawable.ic_menu_myplaces,
-        R.drawable.ic_menu_preferences,
-        R.drawable.ic_menu_recent_history,
-        R.drawable.ic_menu_search,
-        R.drawable.ic_menu_send,
-        R.drawable.ic_menu_share,
-        R.drawable.ic_menu_view
+        android.R.drawable.ic_dialog_email, android.R.drawable.ic_dialog_info,
+        android.R.drawable.ic_dialog_map, android.R.drawable.ic_menu_camera,
+        android.R.drawable.ic_menu_call, android.R.drawable.ic_menu_compass,
+        android.R.drawable.ic_menu_directions, android.R.drawable.ic_menu_gallery,
+        android.R.drawable.ic_menu_help, android.R.drawable.ic_menu_info_details,
+        android.R.drawable.ic_menu_mapmode, android.R.drawable.ic_menu_myplaces,
+        android.R.drawable.ic_menu_preferences, android.R.drawable.ic_menu_recent_history,
+        android.R.drawable.ic_menu_search, android.R.drawable.ic_menu_send,
+        android.R.drawable.ic_menu_share, android.R.drawable.ic_menu_view
     )
 
-    // Tył karty (zakryta) - używamy Twojej rakiety z Lab02
     private val deckResource: Int = pl.wsei.pam.lab01.R.drawable.baseline_rocket_launch_24
-
     private var onGameChangeStateListener: (MemoryGameEvent) -> Unit = {}
     private val matchedPair: Stack<Tile> = Stack()
-    private var logic: MemoryGameLogic = MemoryGameLogic(cols * rows / 2)
+    private var logic: MemoryGameLogic = MemoryGameLogic((cols * rows) / 2)
 
     init {
-        // Losowanie i tasowanie ikon dla par
+        val numPairs = (cols * rows) / 2
         val shuffledIcons: MutableList<Int> = mutableListOf<Int>().also {
-            it.addAll(icons.subList(0, cols * rows / 2))
-            it.addAll(icons.subList(0, cols * rows / 2))
+            // Pobieramy tylko tyle ikon, ile potrzebujemy par
+            val selectedIcons = icons.subList(0, numPairs)
+            it.addAll(selectedIcons)
+            it.addAll(selectedIcons)
             it.shuffle()
         }
 
-        // Pętla wygenerowana i przeniesiona z Aktywności
         for (row in 0 until rows) {
             for (col in 0 until cols) {
-                // Pobieramy i usuwamy pierwszy wylosowany obrazek z listy
-                val currentIcon = shuffledIcons.removeAt(0)
+                if (shuffledIcons.isEmpty()) break // Zabezpieczenie przed brakiem ikon
 
+                val currentIcon = shuffledIcons.removeAt(0)
                 val btn = ImageButton(gridLayout.context).also {
                     it.tag = "${row}x${col}"
                     val layoutParams = GridLayout.LayoutParams()
@@ -67,32 +55,26 @@ class MemoryBoardView(
                     layoutParams.columnSpec = GridLayout.spec(col, 1, 1f)
                     layoutParams.rowSpec = GridLayout.spec(row, 1, 1f)
                     it.layoutParams = layoutParams
-
                     gridLayout.addView(it)
                 }
-
-                // Tworzymy obiekt Tile i podpinamy go do logiki
                 addTile(btn, currentIcon)
             }
         }
     }
 
     private fun onClickTile(v: View) {
-        val tile = tiles[v.tag.toString()]
-        if (tile != null) {
-            matchedPair.push(tile)
-            val matchResult = logic.process {
-                tile.tileResource
-            }
-            onGameChangeStateListener(MemoryGameEvent(matchedPair.toList(), matchResult))
-            if (matchResult != GameStates.Matching) {
-                matchedPair.clear()
-            }
-        }
-    }
+        val tag = v.tag?.toString() ?: return
+        val tile = tiles[tag] ?: return
 
-    fun setOnGameChangeListener(listener: (event: MemoryGameEvent) -> Unit) {
-        onGameChangeStateListener = listener
+        if (tile.revealed || matchedPair.contains(tile)) return
+
+        matchedPair.push(tile)
+        val matchResult = logic.process { tile.tileResource }
+        onGameChangeStateListener(MemoryGameEvent(matchedPair.toList(), matchResult))
+
+        if (matchResult != GameStates.Matching) {
+            matchedPair.clear()
+        }
     }
 
     private fun addTile(button: ImageButton, resourceImage: Int) {
@@ -100,20 +82,18 @@ class MemoryBoardView(
         val tile = Tile(button, resourceImage, deckResource)
         tiles[button.tag.toString()] = tile
     }
+
+    fun setOnGameChangeListener(listener: (event: MemoryGameEvent) -> Unit) {
+        onGameChangeStateListener = listener
+    }
+
     fun getState(): IntArray {
-        // Tworzymy pustą tablicę o rozmiarze planszy
         val state = IntArray(cols * rows)
         var index = 0
-
         for (row in 0 until rows) {
             for (col in 0 until cols) {
                 val tile = tiles["${row}x${col}"]
-                // Jeśli karta jest odsłonięta, zapisujemy jej obrazek. Jeśli nie, zapisujemy -1.
-                if (tile != null && tile.revealed) {
-                    state[index] = tile.tileResource
-                } else {
-                    state[index] = -1
-                }
+                state[index] = if (tile != null && tile.revealed) tile.tileResource else -1
                 index++
             }
         }
@@ -121,28 +101,22 @@ class MemoryBoardView(
     }
 
     fun setState(state: IntArray) {
-        // 1. Sprawdzamy, które ikony zostały już odgadnięte
         val matchedIcons = state.filter { it != -1 }.distinct()
-
-        // 2. Filtrujemy listę dostępnych ikon, odrzucając te już odgadnięte
         val availableIcons = icons.filterNot { it in matchedIcons }.toMutableList()
-
-        // 3. Liczymy, ile par zostało nam jeszcze do ułożenia
         val neededPairsCount = (state.count { it == -1 }) / 2
 
-        // Aktualizujemy logikę gry, żeby wiedziała ile par zostało do końca!
-        logic = MemoryGameLogic(neededPairsCount)
+        logic = MemoryGameLogic(state.size / 2)
 
-        // 4. Losujemy NOWE ikony dla zakrytych kart
         val iconsToShuffle = mutableListOf<Int>()
         for (i in 0 until neededPairsCount) {
-            val icon = availableIcons.removeAt(0)
-            iconsToShuffle.add(icon)
-            iconsToShuffle.add(icon)
+            if (availableIcons.isNotEmpty()) {
+                val icon = availableIcons.removeAt(0)
+                iconsToShuffle.add(icon)
+                iconsToShuffle.add(icon)
+            }
         }
         iconsToShuffle.shuffle()
 
-        // 5. Układamy karty na planszy
         var index = 0
         var shuffleIndex = 0
         for (row in 0 until rows) {
@@ -151,12 +125,10 @@ class MemoryBoardView(
                 if (tile != null) {
                     val savedVal = state[index]
                     if (savedVal != -1) {
-                        // Karta była odgadnięta -> Przywracamy ją!
                         tile.tileResource = savedVal
                         tile.revealed = true
-                        tile.removeOnClickListener() // Blokujemy klikanie
-                    } else {
-                        // Karta była zakryta -> Przypisujemy jej nową wylosowaną ikonę
+                        tile.removeOnClickListener()
+                    } else if (shuffleIndex < iconsToShuffle.size) {
                         tile.tileResource = iconsToShuffle[shuffleIndex++]
                         tile.revealed = false
                     }

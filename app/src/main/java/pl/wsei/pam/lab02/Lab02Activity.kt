@@ -3,43 +3,31 @@ package pl.wsei.pam.lab02
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import pl.wsei.pam.lab01.R
 import pl.wsei.pam.lab03.Lab03Activity
 
 class Lab02Activity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_lab02)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.favorites_grid)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
     }
 
-    fun onBoardSizeBtnClicked(v: View) {
-        val tag: String? = v.tag as String?
-        val tokens: List<String>? = tag?.split(" ")
-        // Zabezpieczenie: jeśli coś pójdzie nie tak, domyślnie bierzemy 3
-        val rows = tokens?.get(0)?.toInt() ?: 3
-        val columns = tokens?.get(1)?.toInt() ?: 3
-
-        // 1. Tworzymy kuriera (Intent)
+    // Ta metoda naprawia błąd "Could not find method onButtonClick"
+    fun onButtonClick(v: View) {
         val intent = Intent(this, Lab03Activity::class.java)
 
-        // 2. Pakujemy wymiary do tablicy
-        val size: IntArray = intArrayOf(rows, columns)
+        val size = when (v.id) {
+            R.id.main_4_4_board -> intArrayOf(4, 4)
+            R.id.main_4_3_board -> intArrayOf(4, 3)
+            R.id.main_6_6_board -> intArrayOf(6, 6)
+            // Jeśli masz osobny przycisk dla 3x2, dodaj go tutaj:
+            // R.id.main_3_2_board -> intArrayOf(3, 2)
+            else -> intArrayOf(3, 2) // Domyślnie ustawiamy 3x2 jeśli nic nie pasuje
+        }
 
-        // 3. Wrzucamy tablicę do bagażnika pod nazwą "size"
         intent.putExtra("size", size)
-
-        // 4. Wysyłamy kuriera w drogę!
         startActivity(intent)
     }
 }
