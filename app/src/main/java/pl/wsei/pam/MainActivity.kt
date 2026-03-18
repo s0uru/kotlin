@@ -1,15 +1,15 @@
 package pl.wsei.pam
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.View // Dodany import dla View
+import android.widget.Toast // Dodany import dla Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import android.view.View
-import android.widget.Toast
-import pl.wsei.pam.lab01.R
-import android.content.Intent
 import pl.wsei.pam.lab01.Lab01Activity
+import pl.wsei.pam.lab01.R
 import pl.wsei.pam.lab02.Lab02Activity
 
 class MainActivity : AppCompatActivity() {
@@ -24,13 +24,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    fun onClickMainBtnRunLab01(v: View) {
-        // To tworzy "zamiar" otwarcia nowej aktywności
+    fun onClickMainBtnRunLab01(v: View){
         val intent = Intent(this, Lab01Activity::class.java)
         startActivity(intent)
     }
-    fun onClickMainBtnRunLab02(v: View) {
+
+    fun onClickMainBtnRunLab02(v: View){
         val intent = Intent(this, Lab02Activity::class.java)
         startActivity(intent)
     }
