@@ -199,7 +199,7 @@ fun ListItem(item: TodoTask, modifier: Modifier = Modifier) {
     }
 }
 
-// 7. Ekran Formularza (Zaktualizowany)
+// 7. Ekran Formularza
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormScreen(navController: NavController) {
@@ -208,7 +208,18 @@ fun FormScreen(navController: NavController) {
     var priority by remember { mutableStateOf(Priority.Low) }
 
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
+
+    // Walidacja daty (tylko dzisiaj i przyszłość)
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                val dateInCalendar = Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneId.of("UTC")).toLocalDate()
+                val dzisiaj = LocalDate.now(ZoneId.of("UTC"))
+                return !dateInCalendar.isBefore(dzisiaj)
+            }
+        }
+    )
+
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
 
     Scaffold(
