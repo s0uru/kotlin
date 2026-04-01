@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/rocket_launch/baseline_rocket_launch_24.xml" />
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialsymbolsoutlined/arrow_upward_alt/outline_arrow_upward_alt_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,7 +28,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="baseline_rocket_launch_24" />
+                            <entry key="outputName" value="baseline_volume_up_24" />
                             <entry key="sourceFile" value="C:\Users\huber\StudioProjects\wsei-pam-lab" />
                           </map>
                         </option>
